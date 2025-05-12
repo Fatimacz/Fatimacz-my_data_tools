@@ -1,0 +1,23 @@
+name: Auto Documentation
+on: [push]  # 每次提交代码时触发
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 生成目录树
+      run: |
+        tree -I "venv|__pycache__" -L 3 --dirsfirst > docs/structure.txt
+        
+    - name: 生成依赖图
+      run: |
+        sudo apt-get install graphviz
+        pip install pydeps
+        pydeps src/ --cluster --rankdir BT -o docs/dependency_graph.png
+        
+    - uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
